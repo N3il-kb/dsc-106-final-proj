@@ -1,24 +1,52 @@
 period,respondent,respondent-name,type,type-name,value,value-units
-2025-11-19T01,CAL,California,D,Demand,26456,megawatthours
+2025-11-19T03,CAL,California,D,Demand,32066,megawatthours
+2025-11-19T03,CAR,Carolinas,D,Demand,21445,megawatthours
+2025-11-19T03,CENT,Central,D,Demand,35834,megawatthours
+2025-11-19T03,FLA,Florida,D,Demand,26517,megawatthours
+2025-11-19T03,MIDA,Mid-Atlantic,D,Demand,95948,megawatthours
+2025-11-19T03,MIDW,Midwest,D,Demand,77533,megawatthours
+2025-11-19T03,NE,New England,D,Demand,14370,megawatthours
+2025-11-19T03,NW,Northwest,D,Demand,43556,megawatthours
+2025-11-19T03,NY,New York,D,Demand,17737,megawatthours
+2025-11-19T03,SE,Southeast,D,Demand,25024,megawatthours
+2025-11-19T03,SW,Southwest,D,Demand,13713,megawatthours
+2025-11-19T03,TEN,Tennessee,D,Demand,17504,megawatthours
+2025-11-19T03,TEX,Texas,D,Demand,58528,megawatthours
+2025-11-19T03,US48,United States Lower 48,D,Demand,479774,megawatthours
+2025-11-19T02,CAL,California,D,Demand,28042,megawatthours
+2025-11-19T02,CAR,Carolinas,D,Demand,22318,megawatthours
+2025-11-19T02,CENT,Central,D,Demand,32530,megawatthours
+2025-11-19T02,FLA,Florida,D,Demand,28748,megawatthours
+2025-11-19T02,MIDA,Mid-Atlantic,D,Demand,99297,megawatthours
+2025-11-19T02,MIDW,Midwest,D,Demand,84612,megawatthours
+2025-11-19T02,NE,New England,D,Demand,15108,megawatthours
+2025-11-19T02,NW,Northwest,D,Demand,41394,megawatthours
+2025-11-19T02,NY,New York,D,Demand,18700,megawatthours
+2025-11-19T02,SE,Southeast,D,Demand,25478,megawatthours
+2025-11-19T02,SW,Southwest,D,Demand,13432,megawatthours
+2025-11-19T02,TEN,Tennessee,D,Demand,18022,megawatthours
+2025-11-19T02,TEX,Texas,D,Demand,58805,megawatthours
+2025-11-19T02,US48,United States Lower 48,D,Demand,486486,megawatthours
+2025-11-19T01,CAL,California,D,Demand,29028,megawatthours
 2025-11-19T01,CAR,Carolinas,D,Demand,22721,megawatthours
-2025-11-19T01,CENT,Central,D,Demand,33127,megawatthours
-2025-11-19T01,FLA,Florida,D,Demand,30473,megawatthours
+2025-11-19T01,CENT,Central,D,Demand,33125,megawatthours
+2025-11-19T01,FLA,Florida,D,Demand,30315,megawatthours
 2025-11-19T01,MIDA,Mid-Atlantic,D,Demand,101367,megawatthours
-2025-11-19T01,MIDW,Midwest,D,Demand,84911,megawatthours
+2025-11-19T01,MIDW,Midwest,D,Demand,86311,megawatthours
 2025-11-19T01,NE,New England,D,Demand,15543,megawatthours
-2025-11-19T01,NW,Northwest,D,Demand,40151,megawatthours
+2025-11-19T01,NW,Northwest,D,Demand,44220,megawatthours
 2025-11-19T01,NY,New York,D,Demand,19219,megawatthours
 2025-11-19T01,SE,Southeast,D,Demand,25991,megawatthours
-2025-11-19T01,SW,Southwest,D,Demand,13102,megawatthours
-2025-11-19T01,TEN,Tennessee,D,Demand,18542,megawatthours
+2025-11-19T01,SW,Southwest,D,Demand,13113,megawatthours
+2025-11-19T01,TEN,Tennessee,D,Demand,18618,megawatthours
 2025-11-19T01,TEX,Texas,D,Demand,60104,megawatthours
-2025-11-19T01,US48,United States Lower 48,D,Demand,491707,megawatthours
-2025-11-19T00,CAL,California,D,Demand,28976,megawatthours
+2025-11-19T01,US48,United States Lower 48,D,Demand,499675,megawatthours
+2025-11-19T00,CAL,California,D,Demand,28983,megawatthours
 2025-11-19T00,CAR,Carolinas,D,Demand,22774,megawatthours
 2025-11-19T00,CENT,Central,D,Demand,33206,megawatthours
 2025-11-19T00,FLA,Florida,D,Demand,31528,megawatthours
 2025-11-19T00,MIDA,Mid-Atlantic,D,Demand,102677,megawatthours
-2025-11-19T00,MIDW,Midwest,D,Demand,87019,megawatthours
+2025-11-19T00,MIDW,Midwest,D,Demand,87020,megawatthours
 2025-11-19T00,NE,New England,D,Demand,15807,megawatthours
 2025-11-19T00,NW,Northwest,D,Demand,42077,megawatthours
 2025-11-19T00,NY,New York,D,Demand,19535,megawatthours
@@ -26,7 +54,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-19T00,SW,Southwest,D,Demand,12456,megawatthours
 2025-11-19T00,TEN,Tennessee,D,Demand,18584,megawatthours
 2025-11-19T00,TEX,Texas,D,Demand,60139,megawatthours
-2025-11-19T00,US48,United States Lower 48,D,Demand,500929,megawatthours
+2025-11-19T00,US48,United States Lower 48,D,Demand,500937,megawatthours
 2025-11-18T23,CAL,California,D,Demand,29588,megawatthours
 2025-11-18T23,CAR,Carolinas,D,Demand,22035,megawatthours
 2025-11-18T23,CENT,Central,D,Demand,32861,megawatthours
@@ -4971,31 +4999,3 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-04T07,US48,United States Lower 48,D,Demand,398882,megawatthours
 2025-11-04T06,CAL,California,D,Demand,30571,megawatthours
 2025-11-04T06,CAR,Carolinas,D,Demand,20707,megawatthours
-2025-11-04T06,CENT,Central,D,Demand,28445,megawatthours
-2025-11-04T06,FLA,Florida,D,Demand,20154,megawatthours
-2025-11-04T06,MIDA,Mid-Atlantic,D,Demand,79830,megawatthours
-2025-11-04T06,MIDW,Midwest,D,Demand,69018,megawatthours
-2025-11-04T06,NE,New England,D,Demand,10830,megawatthours
-2025-11-04T06,NW,Northwest,D,Demand,40753,megawatthours
-2025-11-04T06,NY,New York,D,Demand,14052,megawatthours
-2025-11-04T06,SE,Southeast,D,Demand,22494,megawatthours
-2025-11-04T06,SW,Southwest,D,Demand,12605,megawatthours
-2025-11-04T06,TEN,Tennessee,D,Demand,16690,megawatthours
-2025-11-04T06,TEX,Texas,D,Demand,43548,megawatthours
-2025-11-04T06,US48,United States Lower 48,D,Demand,409697,megawatthours
-2025-11-04T05,CAL,California,D,Demand,31799,megawatthours
-2025-11-04T05,CAR,Carolinas,D,Demand,21215,megawatthours
-2025-11-04T05,CENT,Central,D,Demand,29512,megawatthours
-2025-11-04T05,FLA,Florida,D,Demand,21907,megawatthours
-2025-11-04T05,MIDA,Mid-Atlantic,D,Demand,80920,megawatthours
-2025-11-04T05,MIDW,Midwest,D,Demand,71423,megawatthours
-2025-11-04T05,NE,New England,D,Demand,11204,megawatthours
-2025-11-04T05,NW,Northwest,D,Demand,42784,megawatthours
-2025-11-04T05,NY,New York,D,Demand,14682,megawatthours
-2025-11-04T05,SE,Southeast,D,Demand,23226,megawatthours
-2025-11-04T05,SW,Southwest,D,Demand,13322,megawatthours
-2025-11-04T05,TEN,Tennessee,D,Demand,17234,megawatthours
-2025-11-04T05,TEX,Texas,D,Demand,45763,megawatthours
-2025-11-04T05,US48,United States Lower 48,D,Demand,424991,megawatthours
-2025-11-04T04,CAL,California,D,Demand,32930,megawatthours
-2025-11-04T04,CAR,Carolinas,D,Demand,22273,megawatthours
