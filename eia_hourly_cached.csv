@@ -1,38 +1,38 @@
 period,respondent,respondent-name,type,type-name,value,value-units
-2025-11-19T03,CAL,California,D,Demand,32066,megawatthours
-2025-11-19T03,CAR,Carolinas,D,Demand,21445,megawatthours
-2025-11-19T03,CENT,Central,D,Demand,35834,megawatthours
-2025-11-19T03,FLA,Florida,D,Demand,26517,megawatthours
+2025-11-19T03,CAL,California,D,Demand,29259,megawatthours
+2025-11-19T03,CAR,Carolinas,D,Demand,21489,megawatthours
+2025-11-19T03,CENT,Central,D,Demand,31929,megawatthours
+2025-11-19T03,FLA,Florida,D,Demand,27073,megawatthours
 2025-11-19T03,MIDA,Mid-Atlantic,D,Demand,95948,megawatthours
-2025-11-19T03,MIDW,Midwest,D,Demand,77533,megawatthours
-2025-11-19T03,NE,New England,D,Demand,14370,megawatthours
-2025-11-19T03,NW,Northwest,D,Demand,43556,megawatthours
-2025-11-19T03,NY,New York,D,Demand,17737,megawatthours
-2025-11-19T03,SE,Southeast,D,Demand,25024,megawatthours
-2025-11-19T03,SW,Southwest,D,Demand,13713,megawatthours
+2025-11-19T03,MIDW,Midwest,D,Demand,82474,megawatthours
+2025-11-19T03,NE,New England,D,Demand,14351,megawatthours
+2025-11-19T03,NW,Northwest,D,Demand,44377,megawatthours
+2025-11-19T03,NY,New York,D,Demand,17962,megawatthours
+2025-11-19T03,SE,Southeast,D,Demand,24569,megawatthours
+2025-11-19T03,SW,Southwest,D,Demand,13740,megawatthours
 2025-11-19T03,TEN,Tennessee,D,Demand,17504,megawatthours
-2025-11-19T03,TEX,Texas,D,Demand,58528,megawatthours
-2025-11-19T03,US48,United States Lower 48,D,Demand,479774,megawatthours
-2025-11-19T02,CAL,California,D,Demand,28042,megawatthours
+2025-11-19T03,TEX,Texas,D,Demand,57518,megawatthours
+2025-11-19T03,US48,United States Lower 48,D,Demand,478193,megawatthours
+2025-11-19T02,CAL,California,D,Demand,30733,megawatthours
 2025-11-19T02,CAR,Carolinas,D,Demand,22318,megawatthours
 2025-11-19T02,CENT,Central,D,Demand,32530,megawatthours
 2025-11-19T02,FLA,Florida,D,Demand,28748,megawatthours
 2025-11-19T02,MIDA,Mid-Atlantic,D,Demand,99297,megawatthours
-2025-11-19T02,MIDW,Midwest,D,Demand,84612,megawatthours
+2025-11-19T02,MIDW,Midwest,D,Demand,84690,megawatthours
 2025-11-19T02,NE,New England,D,Demand,15108,megawatthours
-2025-11-19T02,NW,Northwest,D,Demand,41394,megawatthours
+2025-11-19T02,NW,Northwest,D,Demand,41542,megawatthours
 2025-11-19T02,NY,New York,D,Demand,18700,megawatthours
 2025-11-19T02,SE,Southeast,D,Demand,25478,megawatthours
 2025-11-19T02,SW,Southwest,D,Demand,13432,megawatthours
 2025-11-19T02,TEN,Tennessee,D,Demand,18022,megawatthours
 2025-11-19T02,TEX,Texas,D,Demand,58805,megawatthours
-2025-11-19T02,US48,United States Lower 48,D,Demand,486486,megawatthours
+2025-11-19T02,US48,United States Lower 48,D,Demand,489403,megawatthours
 2025-11-19T01,CAL,California,D,Demand,29028,megawatthours
 2025-11-19T01,CAR,Carolinas,D,Demand,22721,megawatthours
 2025-11-19T01,CENT,Central,D,Demand,33125,megawatthours
 2025-11-19T01,FLA,Florida,D,Demand,30315,megawatthours
 2025-11-19T01,MIDA,Mid-Atlantic,D,Demand,101367,megawatthours
-2025-11-19T01,MIDW,Midwest,D,Demand,86311,megawatthours
+2025-11-19T01,MIDW,Midwest,D,Demand,86315,megawatthours
 2025-11-19T01,NE,New England,D,Demand,15543,megawatthours
 2025-11-19T01,NW,Northwest,D,Demand,44220,megawatthours
 2025-11-19T01,NY,New York,D,Demand,19219,megawatthours
@@ -40,10 +40,10 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-19T01,SW,Southwest,D,Demand,13113,megawatthours
 2025-11-19T01,TEN,Tennessee,D,Demand,18618,megawatthours
 2025-11-19T01,TEX,Texas,D,Demand,60104,megawatthours
-2025-11-19T01,US48,United States Lower 48,D,Demand,499675,megawatthours
+2025-11-19T01,US48,United States Lower 48,D,Demand,499679,megawatthours
 2025-11-19T00,CAL,California,D,Demand,28983,megawatthours
 2025-11-19T00,CAR,Carolinas,D,Demand,22774,megawatthours
-2025-11-19T00,CENT,Central,D,Demand,33206,megawatthours
+2025-11-19T00,CENT,Central,D,Demand,33200,megawatthours
 2025-11-19T00,FLA,Florida,D,Demand,31528,megawatthours
 2025-11-19T00,MIDA,Mid-Atlantic,D,Demand,102677,megawatthours
 2025-11-19T00,MIDW,Midwest,D,Demand,87020,megawatthours
@@ -54,10 +54,10 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-19T00,SW,Southwest,D,Demand,12456,megawatthours
 2025-11-19T00,TEN,Tennessee,D,Demand,18584,megawatthours
 2025-11-19T00,TEX,Texas,D,Demand,60139,megawatthours
-2025-11-19T00,US48,United States Lower 48,D,Demand,500937,megawatthours
+2025-11-19T00,US48,United States Lower 48,D,Demand,500931,megawatthours
 2025-11-18T23,CAL,California,D,Demand,29588,megawatthours
 2025-11-18T23,CAR,Carolinas,D,Demand,22035,megawatthours
-2025-11-18T23,CENT,Central,D,Demand,32861,megawatthours
+2025-11-18T23,CENT,Central,D,Demand,32868,megawatthours
 2025-11-18T23,FLA,Florida,D,Demand,31491,megawatthours
 2025-11-18T23,MIDA,Mid-Atlantic,D,Demand,103324,megawatthours
 2025-11-18T23,MIDW,Midwest,D,Demand,85878,megawatthours
@@ -68,10 +68,10 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-18T23,SW,Southwest,D,Demand,12508,megawatthours
 2025-11-18T23,TEN,Tennessee,D,Demand,17861,megawatthours
 2025-11-18T23,TEX,Texas,D,Demand,61457,megawatthours
-2025-11-18T23,US48,United States Lower 48,D,Demand,499373,megawatthours
+2025-11-18T23,US48,United States Lower 48,D,Demand,499380,megawatthours
 2025-11-18T22,CAL,California,D,Demand,29599,megawatthours
 2025-11-18T22,CAR,Carolinas,D,Demand,20682,megawatthours
-2025-11-18T22,CENT,Central,D,Demand,32857,megawatthours
+2025-11-18T22,CENT,Central,D,Demand,32862,megawatthours
 2025-11-18T22,FLA,Florida,D,Demand,31989,megawatthours
 2025-11-18T22,MIDA,Mid-Atlantic,D,Demand,100394,megawatthours
 2025-11-18T22,MIDW,Midwest,D,Demand,84882,megawatthours
@@ -82,10 +82,10 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-18T22,SW,Southwest,D,Demand,12517,megawatthours
 2025-11-18T22,TEN,Tennessee,D,Demand,17497,megawatthours
 2025-11-18T22,TEX,Texas,D,Demand,63923,megawatthours
-2025-11-18T22,US48,United States Lower 48,D,Demand,495208,megawatthours
+2025-11-18T22,US48,United States Lower 48,D,Demand,495213,megawatthours
 2025-11-18T21,CAL,California,D,Demand,30614,megawatthours
 2025-11-18T21,CAR,Carolinas,D,Demand,20104,megawatthours
-2025-11-18T21,CENT,Central,D,Demand,32795,megawatthours
+2025-11-18T21,CENT,Central,D,Demand,32788,megawatthours
 2025-11-18T21,FLA,Florida,D,Demand,31823,megawatthours
 2025-11-18T21,MIDA,Mid-Atlantic,D,Demand,98015,megawatthours
 2025-11-18T21,MIDW,Midwest,D,Demand,84739,megawatthours
@@ -96,7 +96,7 @@ period,respondent,respondent-name,type,type-name,value,value-units
 2025-11-18T21,SW,Southwest,D,Demand,13091,megawatthours
 2025-11-18T21,TEN,Tennessee,D,Demand,17468,megawatthours
 2025-11-18T21,TEX,Texas,D,Demand,64523,megawatthours
-2025-11-18T21,US48,United States Lower 48,D,Demand,491764,megawatthours
+2025-11-18T21,US48,United States Lower 48,D,Demand,491757,megawatthours
 2025-11-18T20,CAL,California,D,Demand,30928,megawatthours
 2025-11-18T20,CAR,Carolinas,D,Demand,20034,megawatthours
 2025-11-18T20,CENT,Central,D,Demand,32717,megawatthours
