@@ -9,5 +9,5 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/gridcast/",
+  base: "/dsc-106-final-proj/",
 });

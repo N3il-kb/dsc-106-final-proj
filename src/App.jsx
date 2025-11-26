@@ -8,7 +8,7 @@ const sections = [
     title: "What Are Data Centers?",
     text: `Every search, every AI query, every cloud upload — they all run through datacenters. These massive facilities house thousands of servers that process, store, and transmit data around the clock.
 In essence, datacenters are the factories of the digital world — and in the age of AI they have become even more important.`,
-    background: "/gridcast/images/datacenter-bg.jpg",
+    background: "/dsc-106-final-proj/images/datacenter-bg.jpg",
   },
   {
     id: "future",
@@ -16,13 +16,13 @@ In essence, datacenters are the factories of the digital world — and in the ag
     text: `Artificial intelligence is revolutionizing every industry from healthcare to finance, and its growth shows no signs of slowing. 
     But behind every query and every AI model training session lies massive computational infrastructure. Data centers currently consume 1-2% of global electricity, and with AI's explosive growth, that number is skyrocketing.The energy used to power these data centers must be monitored and optimized to fit our needs as businesses and as people. As AI becomes more integrated into our daily lives, we're facing a critical question: how do we fuel this technological revolution without accelerating the climate crisis?
 `,
-    background: "/gridcast/images/coal-bg.jpg",
+    background: "/dsc-106-final-proj/images/coal-bg.jpg",
   },
   {
     id: "energy",
     title: "The Solution: Sustainable Data Centers",
     text: `Sustainable data centers are facilities designed to minimize environmental impact while maintaining high computing performance. These facilities achieve efficiency through renewable energy sources, optimized cooling systems with low PUE ratings, and water conservation techniques. The best sustainable data centers can operate on 100% renewable energy with PUE scores below 1.15, compared to the industry average of 1.58.`,
-    background: "/gridcast/images/sustainable_datacenter.jpg",
+    background: "/dsc-106-final-proj/images/sustainable_datacenter.jpg",
   },
   {
     id: "score",
@@ -31,7 +31,7 @@ In essence, datacenters are the factories of the digital world — and in the ag
 
 To measure the concerns of this growing industry, we developed GridScore. A comprehensive dual-framework, it evaluates data centers on both ESG performance and profitability using a 60/40 weighting system. The ESG component (60%) measures environmental factors like energy efficiency and renewable usage. 
 The profitability component (40%) assesses operational efficiency, and computation per energy used, ensuring that sustainable facilities are also financially viable.`,
-    background: "/gridcast/images/scoring_breakdown.png",
+    background: "/dsc-106-final-proj/images/scoring_breakdown.png",
   },
   {
     id: "gridcast",
@@ -39,7 +39,7 @@ The profitability component (40%) assesses operational efficiency, and computati
     text: `Our mission is to use data to provide this information on how and where to build the perfect data center. We believe there is a smarter and better way to ride the wave of AI without harming the planet in the process.
     
     Welcome to GridCast.`,
-    background: "/gridcast/images/hex-gr-bg.avif",
+    background: "/dsc-106-final-proj/images/hex-gr-bg.avif",
     showLaunchButton: true,
   },
 ];
@@ -86,7 +86,7 @@ export default function App() {
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
             <a
-              href="/gridcast/hex_map.html"
+              href="/dsc-106-final-proj/hex_map.html"
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
@@ -177,7 +177,7 @@ function ContactPage() {
       {/* Removed md:self-end from the div below */}
       <div className="flex h-56 w-56 items-center justify-center rounded-2xl border border-white/15 bg-white/5 text-white/60 backdrop-blur-sm">
           <img
-        src="/gridcast/images/qr.png"
+        src="/dsc-106-final-proj/images/qr.png"
         alt="Contact QR Code"
         className="h-full w-full object-contain p-2"
       />
@@ -187,7 +187,7 @@ function ContactPage() {
         href="#"
         className="text-3xl text-neon hover:text-white transition-colors underline decoration-neon/50 decoration-2 underline-offset-4"
       >
-        n3il-kb.github.io/gridcast/
+        n3il-kb.github.io/dsc-106-final-proj/
       </a>
     </div>
     
@@ -246,7 +246,7 @@ function SplitSection({ id, title, text, background, showLaunchButton, index }) 
           {showLaunchButton && (
             <div className="mt-10">
               <a
-                href="/gridcast/hex_map.html"
+                href="/dsc-106-final-proj/hex_map.html"
                 className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
               >
                 Launch Dashboard
@@ -322,7 +322,7 @@ function FullScreenSection({ title, text, background, showLaunchButton }) {
         {showLaunchButton && (
           <div className="mt-10 flex justify-center">
             <a
-              href="/gridcast/hex_map.html"
+              href="/dsc-106-final-proj/hex_map.html"
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
