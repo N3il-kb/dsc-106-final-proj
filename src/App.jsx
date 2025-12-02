@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import Dither from "@/components/Dither";
 import Navbar from "@/components/Navbar";
 import D3ScoreMapPage from "@/pages/D3ScoreMapPage";
+import InternetUsageChart from "@/components/InternetUsageChart";
 
 const sections = [
   {
@@ -10,6 +11,7 @@ const sections = [
     text: `Every search, every AI query, every cloud upload — they all run through datacenters. These massive facilities house thousands of servers that process, store, and transmit data around the clock.
 In essence, datacenters are the factories of the digital world — and in the age of AI they have become even more important.`,
     background: "/dsc-106-final-proj/images/datacenter-bg.jpg",
+    showInternetChart: true,
   },
   {
     id: "future",
@@ -136,12 +138,12 @@ export default function App() {
       {/* Presentation Narrative Sections */}
       <div className="w-full flex flex-col gap-0">
         {sections.map((section, i) => (
-          section.id === "gridcast" ? (
-            <FullScreenSection key={section.id} {...section} />
-          ) : (
-            <SplitSection key={section.id} {...section} index={i} />
-          )
-        ))}
+  section.id === "gridcast" ? (
+    <FullScreenSection key={section.id} {...section} />
+  ) : (
+    <SplitSection key={section.id} {...section} index={i} />
+  )
+))}
       </div>
       <div id="page-bottom" className="h-px w-full" />
     </main>
@@ -231,7 +233,7 @@ function FeatureCard({ title, text, href }) {
   );
 }
 
-function SplitSection({ id, title, text, background, showLaunchButton, index }) {
+function SplitSection({ id, title, text, background, showLaunchButton, index, showInternetChart,  }) {
   const isEven = index % 2 === 0;
 
   return (
@@ -251,6 +253,11 @@ function SplitSection({ id, title, text, background, showLaunchButton, index }) 
           <p className="whitespace-pre-line text-lg leading-relaxed text-gray-400 md:text-xl">
             {text}
           </p>
+          {showInternetChart && (
+            <div className="mt-8">
+              <InternetUsageChart />
+            </div>
+          )}
           {showLaunchButton && (
             <div className="mt-10">
               <a
