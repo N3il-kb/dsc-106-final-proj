@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GridCast Score Map (D3)</title>
+    <link rel="stylesheet" href="./css/d3-score-map.css" />
+  </head>
+  <body>
+    <div class="page">
+      <div class="pill">D3-only remake of the GridScore map</div>
+      <header>
+        <h1>GridCast Score Map</h1>
+        <p class="subtitle">
+          Interactive hex-grid visualization of the GridScore dataset powered entirely by D3 (no Leaflet/Folium).
+          Hover any cell to inspect profitability, sustainability, and cooling-friendly scores.
+        </p>
+      </header>
+
+      <div class="control-bar">
+        <label for="metric-select">
+          Color by
+          <select id="metric-select"></select>
+        </label>
+        <span class="metric-copy"></span>
+      </div>
+
+      <div class="map-shell">
+        <svg id="score-map" role="img" aria-label="GridCast score map"></svg>
+        <div id="tooltip" class="tooltip"></div>
+      </div>
+
+      <div class="legend">
+        <span class="legend__label" data-role="legend-min">0</span>
+        <div class="legend__swatch"></div>
+        <span class="legend__label" data-role="legend-max">1</span>
+      </div>
+
+      <div class="badges">
+        <div class="badge">Data: public/data/score_map.json</div>
+        <div class="badge">Rendering: D3 geo + SVG</div>
+        <div class="badge">Hover cells for full metrics</div>
+      </div>
+    </div>
+
+    <script type="module" src="./js/d3-score-map.js"></script>
+  </body>
+</html>
