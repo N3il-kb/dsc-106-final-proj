@@ -26,6 +26,14 @@ const METRICS = {
     label: "Cooling advantage",
     description: "Temperature-adjusted score that rewards cooler microclimates.",
   },
+  local_temp_c: {
+    label: "Local temperature (°C)",
+    description: "Average local temperature per hex so cooler microclimates pop out.",
+  },
+  elevation_m: {
+    label: "Elevation (m)",
+    description: "Elevation per hex for quick terrain context.",
+  },
 };
 
 const defaultMetric = "dc_score";
@@ -51,7 +59,7 @@ export default function D3ScoreMapPage() {
     const load = async () => {
       try {
         setStatus("loading");
-        const res = await fetch(`${BASE_PATH}data/score_map.json`);
+        const res = await fetch(`${BASE_PATH}data/score_map_hex.json`);
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
@@ -192,7 +200,7 @@ export default function D3ScoreMapPage() {
           </h1>
           <p className="max-w-4xl text-lg text-white/70">
             Interactive hex-grid visualization powered by D3 and Tailwind. Hover any cell to inspect profitability,
-            sustainability, and cooling-friendly metrics driving the GridScore.
+            sustainability, temperature, elevation, and cooling-friendly metrics driving the GridScore.
           </p>
         </div>
 
@@ -256,18 +264,28 @@ export default function D3ScoreMapPage() {
     const tooltip = d3.select(tooltipRef.current);
     const props = feature?.properties ?? {};
     const active = METRICS[activeMetric] ? activeMetric : defaultMetric;
+    const hexId = props.hex_id ?? props.id ?? "—";
+    const regionLabel = props.region ? ` · ${props.region}` : "";
+    const latLon =
+      Number.isFinite(props.lat) && Number.isFinite(props.lon)
+        ? `${formatValue(props.lat, 2)}, ${formatValue(props.lon, 2)}`
+        : "—";
     const html = `
-      <div class="text-sm text-white/70">Region</div>
-      <div class="mb-1 text-lg font-semibold text-white">${props.region ?? "Unassigned region"}</div>
+      <div class="text-xs text-white/60 uppercase tracking-wide">Hexagon ${hexId}${regionLabel}</div>
+      <div class="text-xs text-white/50 mb-1">Lat/Lon: ${latLon}</div>
       <div class="flex items-center justify-between border-b border-white/10 pb-2 text-emerald-200">
         <span>${METRICS[active].label}</span>
         <span class="font-mono text-base text-white">${formatValue(valueFor(feature, active))}</span>
       </div>
       <div class="mt-2 grid grid-cols-2 gap-y-1 text-white/70">
+        <span>GridScore</span><span class="text-white text-right font-mono">${formatValue(props.dc_score)}</span>
+        <span>GridScore (smooth)</span><span class="text-white text-right font-mono">${formatValue(props.dc_score_smooth)}</span>
         <span>Profitability</span><span class="text-white text-right font-mono">${formatValue(props.profitability)}</span>
         <span>Sustainability</span><span class="text-white text-right font-mono">${formatValue(props.sustainability)}</span>
-        <span>GridScore (smooth)</span><span class="text-white text-right font-mono">${formatValue(props.dc_score_smooth)}</span>
         <span>Cooling boost</span><span class="text-white text-right font-mono">${formatValue(props.temp_cool_score)}</span>
+        <span>Cooling advantage</span><span class="text-white text-right font-mono">${formatValue(props.dc_score_temp)}</span>
+        <span>Local temp (°C)</span><span class="text-white text-right font-mono">${formatValue(props.local_temp_c, 1)}</span>
+        <span>Elevation (m)</span><span class="text-white text-right font-mono">${formatValue(props.elevation_m, 0)}</span>
         <span>Distance to region</span><span class="text-white text-right font-mono">${Number.isFinite(props.dist_to_region) ? `${Math.round(props.dist_to_region / 1000)} km` : "—"}</span>
       </div>
     `;
@@ -301,8 +319,13 @@ function colorFor(feature, metric, colorScale) {
   return v === null ? "rgba(255,255,255,0.06)" : colorScale(v);
 }
 
-function formatValue(value) {
-  return Number.isFinite(value) ? d3.format(".2f")(value) : "—";
+function formatValue(value, digits) {
+  if (!Number.isFinite(value)) return "—";
+  if (typeof digits === "number") {
+    return d3.format(`.${digits}f`)(value);
+  }
+  // No rounding when digits not provided
+  return value.toString();
 }
 
 function legendGradient(stops) {

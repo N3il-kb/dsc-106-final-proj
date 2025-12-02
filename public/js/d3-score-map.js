@@ -1,6 +1,6 @@
 import * as d3 from "https://cdn.jsdelivr.net/npm/d3@7/+esm";
 
-const dataUrl = "./data/score_map.json";
+const dataUrl = "./data/score_map_hex.json";
 
 const METRICS = {
   dc_score: {
@@ -35,7 +35,6 @@ const legendSwatch = d3.select(".legend__swatch");
 const legendMin = d3.select("[data-role='legend-min']");
 const legendMax = d3.select("[data-role='legend-max']");
 
-const fmt = d3.format(".2f");
 const colorScale = d3.scaleSequential().interpolator(d3.interpolateRdYlGn);
 
 let featureCollection;
@@ -160,7 +159,7 @@ function setMetricCopy(metricKey) {
 }
 
 function formatValue(value) {
-  return Number.isFinite(value) ? fmt(value) : "—";
+  return Number.isFinite(value) ? value.toString() : "—";
 }
 
 function showTooltip(event, feature, metric) {
