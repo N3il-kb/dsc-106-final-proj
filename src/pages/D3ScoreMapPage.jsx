@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as d3 from "d3";
+import mapboxgl from "mapbox-gl";
 import Navbar from "@/components/Navbar";
 import Dither from "@/components/Dither";
 
@@ -41,10 +42,11 @@ const defaultMetric = "dc_score";
 export default function D3ScoreMapPage() {
   const svgRef = useRef(null);
   const wrapperRef = useRef(null);
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
   const tooltipRef = useRef(null);
   const featureCollectionRef = useRef(null);
-  const zoomTransformRef = useRef(d3.zoomIdentity);
-  const zoomRef = useRef(null);
+  const pathRef = useRef(null);
 
   const [metric, setMetric] = useState(defaultMetric);
   const [domain, setDomain] = useState([0, 1]);
@@ -56,6 +58,9 @@ export default function D3ScoreMapPage() {
 
   useEffect(() => {
     let isMounted = true;
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN;
+
+    // Initialize Mapbox once data is loaded
     const load = async () => {
       try {
         setStatus("loading");
@@ -67,6 +72,7 @@ export default function D3ScoreMapPage() {
         if (!isMounted) return;
         featureCollectionRef.current = json;
         setFeatures(json.features ?? []);
+        initMap();
         setStatus("ready");
       } catch (err) {
         if (!isMounted) return;
@@ -91,19 +97,61 @@ export default function D3ScoreMapPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, [metric, features]);
 
+  const initMap = () => {
+    if (mapRef.current || !mapContainerRef.current) return;
+    const map = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      style: "mapbox://styles/mapbox/light-v11",
+      center: [-98.5, 39],
+      zoom: 3.5,
+      pitch: 0,
+      bearing: 0,
+      interactive: true,
+    });
+    map.addControl(new mapboxgl.NavigationControl(), "top-left");
+
+    map.on("load", () => {
+      mapRef.current = map;
+      render();
+    });
+
+    map.on("move", () => render());
+    map.on("resize", () => render());
+  };
+
   const render = () => {
     if (!wrapperRef.current || !svgRef.current || !featureCollectionRef.current || !features.length) return;
 
     const svg = d3.select(svgRef.current);
-    const wrapperRect = wrapperRef.current.getBoundingClientRect();
-    const width = wrapperRect.width || 960;
-    const height = Math.max(520, Math.round(width * 0.62));
+    const mapEl = mapContainerRef.current;
+    const map = mapRef.current;
+    if (!mapEl || !map) return;
 
-    svg.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
+    const wrapperRect = wrapperRef.current?.getBoundingClientRect();
+    const mapContainerRect = map.getContainer().getBoundingClientRect();
+    const width = mapEl.clientWidth || mapContainerRect.width || wrapperRect?.width || 960;
+    const height = mapEl.clientHeight || mapContainerRect.height || wrapperRect?.height || 520;
+    svg
+      .attr("width", width)
+      .attr("height", height)
+      .attr("viewBox", `0 0 ${width} ${height}`)
+      .attr("preserveAspectRatio", "xMidYMid meet");
 
-    const conusCollection = conusFeatureCollection(features);
-    const projection = d3.geoMercator().fitSize([width, height], conusCollection);
+    const project = (lon, lat) => map.project([lon, lat]);
+    const projection = {
+      stream: (s) => ({
+        point(lon, lat) {
+          const p = project(lon, lat);
+          s.point(p.x, p.y);
+        },
+        lineStart() { s.lineStart(); },
+        lineEnd() { s.lineEnd(); },
+        polygonStart() { s.polygonStart(); },
+        polygonEnd() { s.polygonEnd(); },
+      }),
+    };
     const path = d3.geoPath(projection);
+    pathRef.current = path;
     const values = features.map((f) => valueFor(f, metric)).filter((v) => v !== null);
     const [min, max] = values.length ? d3.extent(values) : [0, 1];
     const safeDomain = Number.isFinite(min) && Number.isFinite(max) && min !== max ? [min, max] : [0, 1];
@@ -133,33 +181,10 @@ export default function D3ScoreMapPage() {
             .on("mouseleave", hideTooltip),
         (update) =>
           update
-            .transition()
-            .duration(350)
             .attr("d", path)
             .attr("fill", (d) => colorFor(d, metric, color)),
         (exit) => exit.remove(),
       );
-
-    // Apply any existing zoom/pan transform (preserve position across renders)
-    layer.attr("transform", zoomTransformRef.current);
-
-    // Initialize zoom once
-    if (!zoomRef.current) {
-      zoomRef.current = d3
-        .zoom()
-        .scaleExtent([1, 8])
-        .translateExtent([
-          [-width, -height],
-          [width * 2, height * 2],
-        ])
-        .on("zoom", (event) => {
-          zoomTransformRef.current = event.transform;
-          layer.attr("transform", event.transform);
-        });
-      svg.call(zoomRef.current);
-      // Optional initial gentle zoom toward the center of the view
-      svg.call(zoomRef.current.transform, d3.zoomIdentity);
-    }
   };
 
   const legendStops = useMemo(() => {
@@ -220,8 +245,8 @@ export default function D3ScoreMapPage() {
             </select>
             <span className="text-sm text-white/70">{metricCopy}</span>
           </div>
-          <div className="flex flex-wrap gap-2 text-xs text-white/60">
-            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Source: score_map.json</span>
+        <div className="flex flex-wrap gap-2 text-xs text-white/60">
+            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Source: score_map_hex.json</span>
             <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Rendering: D3 geo + SVG</span>
             <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Hover cells for details</span>
           </div>
@@ -229,9 +254,10 @@ export default function D3ScoreMapPage() {
 
         <div
           ref={wrapperRef}
-          className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a1320] via-[#08111d] to-[#0e1624] shadow-[0_30px_80px_rgba(0,0,0,0.35)]"
+          className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a1320] via-[#08111d] to-[#0e1624] shadow-[0_30px_80px_rgba(0,0,0,0.35)] h-[70vh] min-h-[520px]"
         >
-          <svg ref={svgRef} className="h-[70vh] min-h-[520px] w-full"></svg>
+          <div ref={mapContainerRef} className="absolute inset-0 h-full w-full" />
+          <svg ref={svgRef} className="absolute inset-0 h-full w-full"></svg>
           <div
             ref={tooltipRef}
             className="pointer-events-none absolute left-0 top-0 z-10 hidden min-w-[240px] rounded-2xl border border-white/10 bg-[#0c1622]/95 p-4 text-sm shadow-2xl backdrop-blur-md"
