@@ -4,6 +4,8 @@ import Navbar from "@/components/Navbar";
 import D3ScoreMapPage from "@/pages/D3ScoreMapPage";
 import InternetUsageChart from "@/components/InternetUsageChart";
 
+const BASE_PATH = import.meta.env.BASE_URL ?? "/";
+
 const sections = [
   {
     id: "datacenters",
@@ -48,7 +50,6 @@ The profitability component (40%) assesses operational efficiency, and computati
 ];
 
 export default function App() {
-  const basePath = import.meta.env.BASE_URL ?? "/";
   const isContactPage =
     typeof window !== "undefined" &&
     window.location.pathname.toLowerCase().includes("contact");
@@ -96,7 +97,7 @@ export default function App() {
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
             <a
-              href={`${basePath}dashboard`}
+              href={`${BASE_PATH}d3-score-map.html`}
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
@@ -261,7 +262,7 @@ function SplitSection({ id, title, text, background, showLaunchButton, index, sh
           {showLaunchButton && (
             <div className="mt-10">
               <a
-                href="/dsc-106-final-proj/hex_map.html"
+                href={`${BASE_PATH}d3-score-map.html`}
                 className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
               >
                 Launch Dashboard
@@ -337,7 +338,7 @@ function FullScreenSection({ title, text, background, showLaunchButton }) {
         {showLaunchButton && (
           <div className="mt-10 flex justify-center">
             <a
-              href="/dsc-106-final-proj/hex_map.html"
+              href={`${BASE_PATH}d3-score-map.html`}
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard

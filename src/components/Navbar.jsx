@@ -1,3 +1,5 @@
+const BASE_PATH = import.meta.env.BASE_URL ?? "/";
+
 export default function Navbar() {
   return (
     <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 w-full max-w-2xl px-4">
@@ -20,7 +22,7 @@ export default function Navbar() {
         <ul className="flex items-center gap-6 text-sm text-white/70">
           <li>
             <a
-              href="/dsc-106-final-proj/hex_map.html"
+              href={`${BASE_PATH}d3-score-map.html`}
               className="transition hover:text-neon hover:drop-shadow-[0_0_8px_rgba(0,255,128,0.6)] font-medium"
             >
               Dashboard
