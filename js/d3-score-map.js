@@ -39,6 +39,8 @@ const colorScale = d3.scaleSequential().interpolator(d3.interpolateRdYlGn);
 
 let featureCollection;
 let features = [];
+let filteredFeatures = [];
+let filteredFeatureCollection;
 let projection;
 let pathGenerator;
 const cellLayer = svg.append("g").attr("data-layer", "cells");
@@ -49,6 +51,8 @@ async function init() {
   try {
     featureCollection = await d3.json(dataUrl);
     features = featureCollection?.features ?? [];
+    filteredFeatureCollection = conusFeatureCollection(features);
+    filteredFeatures = filteredFeatureCollection.features;
     buildMetricOptions();
     setMetricCopy(metricSelect.value);
     resize();
@@ -83,20 +87,20 @@ function resize() {
   const height = Math.max(520, window.innerHeight * 0.65);
 
   svg.attr("viewBox", `0 0 ${width} ${height}`).attr("preserveAspectRatio", "xMidYMid meet");
-  projection = d3.geoMercator().fitSize([width, height], featureCollection);
+  projection = d3.geoMercator().fitSize([width, height], filteredFeatureCollection);
   pathGenerator = d3.geoPath(projection);
 
   drawCells(metricSelect.value);
 }
 
 function drawCells(metric) {
-  if (!features.length || !pathGenerator) return;
+  if (!filteredFeatures.length || !pathGenerator) return;
 
-  const domain = metricDomain(features, metric);
+  const domain = metricDomain(filteredFeatures, metric);
   colorScale.domain(domain);
   updateLegend(domain);
 
-  const cells = cellLayer.selectAll("path.hex-cell").data(features, (d) => d.id ?? d.properties?.hex_id);
+  const cells = cellLayer.selectAll("path.hex-cell").data(filteredFeatures, (d) => d.id ?? d.properties?.hex_id);
 
   cells
     .join(
@@ -198,5 +202,17 @@ function debounce(fn, delay = 150) {
   return (...args) => {
     clearTimeout(handle);
     handle = setTimeout(() => fn.apply(null, args), delay);
+  };
+}
+
+// Restrict to CONUS so the map is zoomed into the lower 48
+function conusFeatureCollection(allFeatures) {
+  const filtered = (allFeatures ?? []).filter((f) => {
+    const [lon, lat] = d3.geoCentroid(f);
+    return lon >= -130 && lon <= -60 && lat >= 22 && lat <= 52;
+  });
+  return {
+    type: "FeatureCollection",
+    features: filtered.length ? filtered : allFeatures ?? [],
   };
 }
