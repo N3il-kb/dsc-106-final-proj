@@ -11,10 +11,6 @@ const METRICS = {
     label: "GridScore",
     description: "Composite score balancing sustainability and profitability (60/40 weighting).",
   },
-  dc_score_smooth: {
-    label: "GridScore (smoothed)",
-    description: "Neighbor-smoothed GridScore to reduce noise between adjacent hexes.",
-  },
   sustainability: {
     label: "Sustainability",
     description: "ESG tilt driven by renewables share, volatility, and cooling friendliness.",
@@ -47,9 +43,14 @@ export default function D3ScoreMapPage() {
   const tooltipRef = useRef(null);
   const featureCollectionRef = useRef(null);
   const frameIdRef = useRef(null);
+  const isPanningRef = useRef(false);
   const prevMetricRef = useRef(defaultMetric);
   const metricRef = useRef(defaultMetric);
   const visibleFeaturesRef = useRef([]);
+  const metricDomainsRef = useRef({});
+  const palettesRef = useRef({});
+  const quadtreeRef = useRef(null);
+  const hoveredFeatureRef = useRef(null);
 
   const [metric, setMetric] = useState(defaultMetric);
   const [domain, setDomain] = useState([0, 1]);
@@ -59,6 +60,11 @@ export default function D3ScoreMapPage() {
   const [mapReady, setMapReady] = useState(false);
 
   const metricCopy = useMemo(() => METRICS[metric]?.description ?? "", [metric]);
+  const setCanvasOpacity = (value) => {
+    if (canvasRef.current) {
+      canvasRef.current.style.opacity = value;
+    }
+  };
 
   // Initialize map on mount
   useEffect(() => {
@@ -83,12 +89,17 @@ export default function D3ScoreMapPage() {
       setMapReady(true);
     });
 
-    // Throttle rendering during map movement using requestAnimationFrame
-    map.on("move", () => {
-      if (frameIdRef.current) {
-        cancelAnimationFrame(frameIdRef.current);
-      }
-      frameIdRef.current = requestAnimationFrame(() => render());
+    map.on("movestart", () => {
+      isPanningRef.current = true;
+      hideTooltip();
+      setCanvasOpacity(0);
+    });
+
+    // Render once after panning/zooming stops
+    map.on("moveend", () => {
+      isPanningRef.current = false;
+      setCanvasOpacity(1);
+      render();
     });
 
     map.on("resize", () => render());
@@ -127,17 +138,43 @@ export default function D3ScoreMapPage() {
         const json = await res.json();
         if (!isMounted) return;
 
-        // Pre-compute centroids for each feature (expensive operation done once)
+        // Pre-compute centroids and bounds for each feature (expensive operation done once)
         const featuresWithCentroids = (json.features ?? []).map((f) => {
           const centroid = d3.geoCentroid(f);
+          const bounds = d3.geoBounds(f);
           return {
             ...f,
             _centroid: centroid, // Cache centroid for fast viewport culling
+            _bounds: bounds, // Cache bounds for hover short-circuiting
           };
         });
 
+        // Pre-compute global metric domains and color palettes (no per-frame extent)
+        const domains = {};
+        Object.keys(METRICS).forEach((key) => {
+          const vals = featuresWithCentroids
+            .map((f) => valueFor(f, key))
+            .filter((v) => v !== null);
+          const [min, max] = vals.length ? d3.extent(vals) : [0, 1];
+          domains[key] = Number.isFinite(min) && Number.isFinite(max) && min !== max ? [min, max] : [0, 1];
+        });
+
+        const palettes = {};
+        Object.entries(domains).forEach(([key, dom]) => {
+          const scale = d3.scaleSequential(dom, d3.interpolateRdYlGn);
+          const colors = Array.from({ length: 256 }, (_, i) => {
+            const t = i / 255;
+            const v = dom[0] + t * (dom[1] - dom[0]);
+            return scale(v);
+          });
+          palettes[key] = colors;
+        });
+
         featureCollectionRef.current = { ...json, features: featuresWithCentroids };
+        metricDomainsRef.current = domains;
+        palettesRef.current = palettes;
         setFeatures(featuresWithCentroids);
+        setDomain(domains[defaultMetric] ?? [0, 1]);
         setStatus("ready");
       } catch (err) {
         if (!isMounted) return;
@@ -157,6 +194,8 @@ export default function D3ScoreMapPage() {
     if (!mapReady || !features.length) return;
     prevMetricRef.current = metric;
     metricRef.current = metric;
+    const dom = metricDomainsRef.current[metric];
+    if (dom) setDomain(dom);
     render();
   }, [metric, features, mapReady]);
 
@@ -169,7 +208,7 @@ export default function D3ScoreMapPage() {
     const ne = bounds.getNorthEast();
 
     // Add a small buffer to prevent popping at edges
-    const buffer = 0.5;
+    const buffer = 0.2;
     const minLng = sw.lng - buffer;
     const maxLng = ne.lng + buffer;
     const minLat = sw.lat - buffer;
@@ -228,40 +267,94 @@ export default function D3ScoreMapPage() {
     // Get visible features and store for hit testing
     const visibleFeatures = getVisibleFeatures(allFeatures, map);
     visibleFeaturesRef.current = visibleFeatures;
+    quadtreeRef.current = d3
+      .quadtree()
+      .x((d) => d[0])
+      .y((d) => d[1])
+      .addAll(
+        visibleFeatures.map((f) => {
+          const c = f._centroid ?? [0, 0];
+          return [c[0], c[1], f];
+        }),
+      );
 
     // Use ref to get current metric (avoids stale closure in map event handlers)
     const currentMetric = metricRef.current;
 
-    const values = visibleFeatures.map((f) => valueFor(f, currentMetric)).filter((v) => v !== null);
-    const [min, max] = values.length ? d3.extent(values) : [0, 1];
-    const safeDomain = Number.isFinite(min) && Number.isFinite(max) && min !== max ? [min, max] : [0, 1];
-    setDomain((prev) => (prev[0] === safeDomain[0] && prev[1] === safeDomain[1] ? prev : safeDomain));
-
-    const color = d3.scaleSequential(safeDomain, d3.interpolateRdYlGn);
+    const metricDomain = metricDomainsRef.current[currentMetric] ?? [0, 1];
+    const palette = palettesRef.current[currentMetric];
 
     // Draw each hex to canvas (this is still D3!)
     ctx.globalAlpha = 0.7;
-    visibleFeatures.forEach((f) => {
+    const drawSet = visibleFeatures;
+    drawSet.forEach((f) => {
       ctx.beginPath();
       path(f);
-      ctx.fillStyle = colorFor(f, currentMetric, color);
+      ctx.fillStyle = colorFor(f, currentMetric, palette, metricDomain);
       ctx.fill();
       ctx.strokeStyle = "rgba(255,255,255,0.15)";
       ctx.lineWidth = 0.35;
       ctx.stroke();
     });
+
+    // Highlight hovered hex if present and visible
+    const hovered = hoveredFeatureRef.current;
+    if (hovered) {
+      const hoveredId = featureId(hovered);
+      const match = visibleFeatures.find((f) => featureId(f) === hoveredId);
+      if (match) {
+        ctx.save();
+        ctx.beginPath();
+        path(match);
+        ctx.globalAlpha = 0.95;
+        ctx.strokeStyle = "rgba(255,255,255,0.9)";
+        ctx.lineWidth = 1.2;
+        ctx.shadowColor = "rgba(0,255,128,0.45)";
+        ctx.shadowBlur = 8;
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
   };
 
   // Map mouse move handler for tooltip hit detection (uses Mapbox events)
   const handleMapMouseMove = (e) => {
+    if (isPanningRef.current) {
+      hideTooltip();
+      return;
+    }
     const lngLat = e.lngLat;
 
-    // Find hex containing this point using D3's geoContains
-    const hoveredFeature = visibleFeaturesRef.current.find((f) => {
-      return d3.geoContains(f, [lngLat.lng, lngLat.lat]);
-    });
+    // Prefer nearest-centroid candidate to limit geoContains checks
+    const qt = quadtreeRef.current;
+    let hoveredFeature = null;
+    const nearest = qt?.find(lngLat.lng, lngLat.lat, 0.8);
+    if (nearest?.[2]) {
+      const candidate = nearest[2];
+      if (d3.geoContains(candidate, [lngLat.lng, lngLat.lat])) {
+        hoveredFeature = candidate;
+      }
+    }
+
+    // Fallback: linear search over visible features (still bounded)
+    if (!hoveredFeature) {
+      hoveredFeature = visibleFeaturesRef.current.find((f) => {
+        const b = f._bounds;
+        if (b) {
+          const [[minLon, minLat], [maxLon, maxLat]] = b;
+          if (lngLat.lng < minLon || lngLat.lng > maxLon || lngLat.lat < minLat || lngLat.lat > maxLat) {
+            return false;
+          }
+        }
+        return d3.geoContains(f, [lngLat.lng, lngLat.lat]);
+      });
+    }
 
     if (hoveredFeature) {
+      if (featureId(hoveredFeature) !== featureId(hoveredFeatureRef.current)) {
+        hoveredFeatureRef.current = hoveredFeature;
+        render();
+      }
       // Create a synthetic event-like object for showTooltip
       const syntheticEvent = {
         clientX: e.point.x + (wrapperRef.current?.getBoundingClientRect().left ?? 0),
@@ -269,18 +362,27 @@ export default function D3ScoreMapPage() {
       };
       showTooltip(syntheticEvent, hoveredFeature, metricRef.current);
     } else {
+      if (hoveredFeatureRef.current) {
+        hoveredFeatureRef.current = null;
+        render();
+      }
       hideTooltip();
     }
   };
 
   const legendStops = useMemo(() => {
     const [min, max] = domain;
-    const color = d3.scaleSequential(domain, d3.interpolateRdYlGn);
+    const palette = palettesRef.current[metric] ?? null;
     return d3.range(0, 1.01, 0.1).map((t) => {
       const v = min + t * (max - min);
-      return { color: color(v), offset: Math.round(t * 100) };
+      if (palette && max !== min) {
+        const idx = Math.max(0, Math.min(255, Math.floor(t * 255)));
+        return { color: palette[idx], offset: Math.round(t * 100) };
+      }
+      const color = d3.interpolateRdYlGn(t);
+      return { color, offset: Math.round(t * 100) };
     });
-  }, [domain]);
+  }, [domain, metric]);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#050910] text-white">
@@ -394,7 +496,6 @@ export default function D3ScoreMapPage() {
       </div>
       <div class="mt-2 grid grid-cols-2 gap-y-1 text-white/70">
         <span>GridScore</span><span class="text-white text-right font-mono">${formatValue(props.dc_score)}</span>
-        <span>GridScore (smooth)</span><span class="text-white text-right font-mono">${formatValue(props.dc_score_smooth)}</span>
         <span>Profitability</span><span class="text-white text-right font-mono">${formatValue(props.profitability)}</span>
         <span>Sustainability</span><span class="text-white text-right font-mono">${formatValue(props.sustainability)}</span>
         <span>Cooling boost</span><span class="text-white text-right font-mono">${formatValue(props.temp_cool_score)}</span>
@@ -429,9 +530,18 @@ function valueFor(feature, metric) {
   return Number.isFinite(n) ? n : null;
 }
 
-function colorFor(feature, metric, colorScale) {
+function featureId(feature) {
+  return feature?.id ?? feature?.properties?.hex_id ?? null;
+}
+
+function colorFor(feature, metric, palette, domain) {
   const v = valueFor(feature, metric);
-  return v === null ? "rgba(255,255,255,0.06)" : colorScale(v);
+  if (v === null || !palette || !domain) return "rgba(255,255,255,0.06)";
+  const [min, max] = domain;
+  if (max === min) return "rgba(255,255,255,0.06)";
+  const t = (v - min) / (max - min);
+  const idx = Math.max(0, Math.min(255, Math.floor(t * 255)));
+  return palette[idx];
 }
 
 function formatValue(value, digits) {
