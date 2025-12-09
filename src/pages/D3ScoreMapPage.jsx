@@ -34,6 +34,26 @@ const METRICS = {
 };
 
 const defaultMetric = "dc_score";
+const ANNOTATIONS = [
+  {
+    id: "pnw",
+    label: "Cool, high-GridScore cluster (PNW)",
+    colorClass: "bg-emerald-300",
+    coords: [-122.7, 45.6], // lon, lat
+  },
+  {
+    id: "south",
+    label: "Warmer, costlier cells across the South",
+    colorClass: "bg-amber-300",
+    coords: [-90, 30], // lon, lat
+  },
+  {
+    id: "carolinas",
+    label: "Carolinas: top GridScore – sustainable and profitable",
+    colorClass: "bg-emerald-200",
+    coords: [-79.8, 34.9], // lon, lat near Carolinas
+  },
+];
 
 export default function D3ScoreMapPage() {
   const canvasRef = useRef(null);
@@ -42,6 +62,7 @@ export default function D3ScoreMapPage() {
   const mapContainerRef = useRef(null);
   const tooltipRef = useRef(null);
   const featureCollectionRef = useRef(null);
+  const frameIdRef = useRef(null);
   const isPanningRef = useRef(false);
   const mapReadyRef = useRef(false);
   const prevMetricRef = useRef(defaultMetric);
@@ -52,6 +73,7 @@ export default function D3ScoreMapPage() {
   const quadtreeRef = useRef(null);
   const hoveredFeatureRef = useRef(null);
   const clearHoverRef = useRef(null);
+  const annotationRefs = useRef({});
 
   const [metric, setMetric] = useState(defaultMetric);
   const [domain, setDomain] = useState([0, 1]);
@@ -100,12 +122,23 @@ export default function D3ScoreMapPage() {
       hideTooltip();
     });
 
-    // Keep overlay in sync with map rendering
-    map.on("render", () => render());
+    const scheduleRender = () => {
+      if (frameIdRef.current) return;
+      frameIdRef.current = requestAnimationFrame(() => {
+        frameIdRef.current = null;
+        render();
+      });
+    };
+
+    map.on("move", scheduleRender);
 
     // Render once after panning/zooming stops
     map.on("moveend", () => {
       isPanningRef.current = false;
+      if (frameIdRef.current) {
+        cancelAnimationFrame(frameIdRef.current);
+        frameIdRef.current = null;
+      }
       render();
     });
 
@@ -117,6 +150,10 @@ export default function D3ScoreMapPage() {
 
     return () => {
       mapReadyRef.current = false;
+      if (frameIdRef.current) {
+        cancelAnimationFrame(frameIdRef.current);
+        frameIdRef.current = null;
+      }
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -237,6 +274,7 @@ export default function D3ScoreMapPage() {
     if (mapCanvas && canvas.style.transform !== mapCanvas.style.transform) {
       canvas.style.transform = mapCanvas.style.transform;
     }
+    canvas.style.transformOrigin = mapCanvas?.style.transformOrigin || "0 0";
 
     const width = mapContainerRef.current.clientWidth || 960;
     const height = mapContainerRef.current.clientHeight || 520;
@@ -322,6 +360,14 @@ export default function D3ScoreMapPage() {
         ctx.restore();
       }
     }
+
+    // Update annotation positions to stay anchored on map
+    ANNOTATIONS.forEach((ann) => {
+      const el = annotationRefs.current[ann.id];
+      if (!el) return;
+      const projected = map.project(ann.coords);
+      el.style.transform = `translate(${projected.x}px, ${projected.y}px)`;
+    });
   };
 
   // Map mouse move handler for tooltip hit detection (uses Mapbox events)
@@ -467,16 +513,32 @@ export default function D3ScoreMapPage() {
             ref={canvasRef}
             className="absolute inset-0 h-full w-full pointer-events-none"
           />
-          <div className="pointer-events-none absolute right-4 top-4 z-10 flex flex-col gap-2 text-xs text-right">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-white/80 shadow-lg backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-emerald-300" />
-              Cool, high-GridScore cluster (PNW)
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-white/80 shadow-lg backdrop-blur">
-              <span className="h-2 w-2 rounded-full bg-amber-300" />
-              Warmer, costlier cells across the South
-            </span>
-          </div>
+          {metric === "dc_score" && (
+            <div className="pointer-events-none absolute inset-0 z-10">
+              {ANNOTATIONS.map((ann) => (
+                <div
+                  key={ann.id}
+                  ref={(el) => {
+                    if (el) annotationRefs.current[ann.id] = el;
+                  }}
+                  className="absolute"
+                  style={{ transform: "translate(-9999px, -9999px)" }}
+                >
+                  <div
+                    className="group pointer-events-auto flex items-center gap-2"
+                    onMouseEnter={() => hideTooltip()}
+                  >
+                    <span
+                      className={`h-3 w-3 rounded-full ${ann.colorClass} shadow-lg shadow-black/40 ring-2 ring-black/60 group-hover:scale-110 transition`}
+                    />
+                    <span className="pointer-events-none opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-200 ease-out rounded-full border border-white/10 bg-black/80 px-3 py-1 text-xs text-white/85 shadow-lg backdrop-blur whitespace-nowrap">
+                      {ann.label}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
           <div
             ref={tooltipRef}
             className="pointer-events-none absolute left-0 top-0 z-10 hidden min-w-[240px] rounded-2xl border border-white/10 bg-[#0c1622]/95 p-4 text-sm shadow-2xl backdrop-blur-md"
