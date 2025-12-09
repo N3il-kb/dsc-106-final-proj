@@ -5,7 +5,11 @@ export default function Navbar() {
     <header className="fixed top-6 left-1/2 z-50 -translate-x-1/2 w-full max-w-2xl px-4">
       <nav className="flex items-center justify-between gap-8 rounded-full border border-white/10 bg-glass px-8 py-4 shadow-[0_0_30px_rgba(0,255,128,0.15)] backdrop-blur-xl">
         {/* Logo + Title */}
-        <div className="flex items-center gap-2">
+        <a
+          href={`${BASE_PATH}`}
+          className="flex items-center gap-2 transition hover:text-neon hover:drop-shadow-[0_0_8px_rgba(0,255,128,0.6)] font-medium"
+          aria-label="GridCast Home"
+        >
           <span
             className="text-2xl drop-shadow-[0_0_8px_rgba(0,255,128,0.4)]"
             role="img"
@@ -16,13 +20,13 @@ export default function Navbar() {
           <span className="text-xl font-bold tracking-tight text-white">
             GridCast
           </span>
-        </div>
+        </a>
 
         {/* Nav links */}
         <ul className="flex items-center gap-6 text-sm text-white/70">
           <li>
             <a
-              href={`${BASE_PATH}d3-score-map.html`}
+              href={`${BASE_PATH}dashboard`}
               className="transition hover:text-neon hover:drop-shadow-[0_0_8px_rgba(0,255,128,0.6)] font-medium"
             >
               Dashboard
