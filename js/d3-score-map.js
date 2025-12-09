@@ -124,9 +124,14 @@ function drawCells(metric) {
 }
 
 function metricDomain(data, metric) {
-  const values = data
-    .map((d) => valueFor(d, metric))
-    .filter((v) => Number.isFinite(v));
+  // Use shared domain for dc_score and dc_score_smooth so differences are visible
+  const metricsToUse = (metric === "dc_score" || metric === "dc_score_smooth")
+    ? ["dc_score", "dc_score_smooth"]
+    : [metric];
+
+  const values = metricsToUse.flatMap((m) =>
+    data.map((d) => valueFor(d, m)).filter((v) => Number.isFinite(v))
+  );
   const [min, max] = d3.extent(values.length ? values : [0, 1]);
   if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
     return [0, 1];
