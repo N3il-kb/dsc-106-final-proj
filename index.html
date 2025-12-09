@@ -1,16 +1,60 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GridCast</title>
+  <title>Datacenter Potential – EIA & Infrastructure Explorer</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
-  <div id="root"></div>
-  <script type="module" src="/src/main.jsx"></script>
-</body>
+  <header>
+    <h1>Datacenter Potential Across the United States</h1>
+    <p>
+      This prototype explores where future datacenters might be located in the U.S. by visualizing
+      a placeholder "datacenter potential" score for each state. Future iterations will combine
+      electricity demand data from the EIA with additional infrastructure, environmental, and
+      economic factors.
+    </p>
+  </header>
 
+  <main>
+    <section id="controls">
+      <label for="metric-select"><strong>Color map by:</strong></label>
+      <select id="metric-select">
+        <option value="score_combo">Overall potential (placeholder)</option>
+        <option value="score_demand">High electricity demand</option>
+        <option value="score_renewables">Renewable availability (placeholder)</option>
+      </select>
+    </section>
+
+    <section id="map-section">
+      <h2>Interactive Map of Datacenter Potential</h2>
+      <div id="map"></div>
+    </section>
+
+    <section id="description">
+      <h2>How to Use This Prototype</h2>
+      <p>
+        Use the dropdown above to change which metric is used to color each state.
+        Hover over a state to see its name and placeholder scores.
+        In the final project, these scores will be derived from real data including
+        hourly electricity demand (EIA), renewable generation, climate, and other
+        infrastructure constraints.
+      </p>
+
+      <h2>Next Steps</h2>
+      <ul>
+        <li>Replace placeholder scores with real aggregated metrics per state or region.</li>
+        <li>Add the ability to re-weight factors (e.g., demand vs. renewables vs. cost).</li>
+        <li>Link this map to time-series views using EIA hourly demand data.</li>
+        <li>Allow users to drill down into specific regions or grid operators.</li>
+      </ul>
+    </section>
+  </main>
+
+  <!-- Tooltip -->
+  <div id="tooltip" class="tooltip" style="opacity: 0;"></div>
+
+  <!-- D3 script -->
+  <script type="module" src="script.js"></script>
+</body>
 </html>

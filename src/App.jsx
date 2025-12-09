@@ -155,9 +155,9 @@ export default function App() {
       <div className="w-full flex flex-col gap-0">
         {sections.map((section, i) =>
           section.id === "gridcast" ? (
-            <FullScreenSection key={section.id} {...section} />
+            <FullScreenSection key={section.id} {...section} basePath={basePath} />
           ) : (
-            <SplitSection key={section.id} {...section} index={i} />
+            <SplitSection key={section.id} {...section} index={i} basePath={basePath} />
           )
         )}
       </div>
@@ -510,7 +510,7 @@ function SplitSection({
           {showLaunchButton && (
             <div className="mt-10">
               <a
-                href="/dsc-106-final-proj/hex_map.html"
+                href={`${basePath}dashboard`}
                 className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
               >
                 Launch Dashboard
@@ -543,7 +543,7 @@ function SplitSection({
   );
 }
 
-function FullScreenSection({ title, text, background, showLaunchButton }) {
+function FullScreenSection({ title, text, background, showLaunchButton, basePath }) {
   return (
     <section className="relative isolate flex h-screen items-center justify-center overflow-hidden px-6 text-center md:px-24">
       {background ? (
@@ -584,7 +584,7 @@ function FullScreenSection({ title, text, background, showLaunchButton }) {
         {showLaunchButton && (
           <div className="mt-10 flex justify-center">
             <a
-              href="/dsc-106-final-proj/hex_map.html"
+              href={`${basePath}dashboard`}
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
