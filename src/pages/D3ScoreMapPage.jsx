@@ -40,7 +40,7 @@ const METRICS = {
 const defaultMetric = "dc_score";
 
 export default function D3ScoreMapPage() {
-  const svgRef = useRef(null);
+  const canvasRef = useRef(null);
   const wrapperRef = useRef(null);
   const mapRef = useRef(null);
   const mapContainerRef = useRef(null);
@@ -49,6 +49,7 @@ export default function D3ScoreMapPage() {
   const frameIdRef = useRef(null);
   const prevMetricRef = useRef(defaultMetric);
   const metricRef = useRef(defaultMetric);
+  const visibleFeaturesRef = useRef([]);
 
   const [metric, setMetric] = useState(defaultMetric);
   const [domain, setDomain] = useState([0, 1]);
@@ -87,10 +88,19 @@ export default function D3ScoreMapPage() {
       if (frameIdRef.current) {
         cancelAnimationFrame(frameIdRef.current);
       }
-      frameIdRef.current = requestAnimationFrame(() => render(false));
+      frameIdRef.current = requestAnimationFrame(() => render());
     });
 
-    map.on("resize", () => render(false));
+    map.on("resize", () => render());
+
+    // Handle mouse move for tooltip hit detection (on map, not canvas)
+    map.on("mousemove", (e) => {
+      handleMapMouseMove(e);
+    });
+
+    map.on("mouseleave", () => {
+      hideTooltip();
+    });
 
     return () => {
       if (frameIdRef.current) {
@@ -145,10 +155,9 @@ export default function D3ScoreMapPage() {
   // Render when both map is ready AND features are loaded, or when metric changes
   useEffect(() => {
     if (!mapReady || !features.length) return;
-    const isMetricChange = prevMetricRef.current !== metric;
     prevMetricRef.current = metric;
     metricRef.current = metric;
-    render(isMetricChange);
+    render();
   }, [metric, features, mapReady]);
 
   // Get only features visible in the current map viewport (uses pre-computed centroids)
@@ -175,24 +184,30 @@ export default function D3ScoreMapPage() {
     });
   };
 
-  const render = (withTransition = false) => {
+  // Canvas-based render function - much faster than SVG for large datasets
+  const render = () => {
     const allFeatures = featureCollectionRef.current?.features;
-    if (!wrapperRef.current || !svgRef.current || !allFeatures?.length) return;
+    if (!canvasRef.current || !allFeatures?.length) return;
 
-    const svg = d3.select(svgRef.current);
+    const canvas = canvasRef.current;
     const map = mapRef.current;
     if (!map || !mapContainerRef.current) return;
 
     const width = mapContainerRef.current.clientWidth || 960;
     const height = mapContainerRef.current.clientHeight || 520;
 
-    svg
-      .attr("width", width)
-      .attr("height", height)
-      .attr("viewBox", `0 0 ${width} ${height}`)
-      .attr("preserveAspectRatio", "xMidYMid meet");
+    // Set canvas size (must set both attribute and style for HiDPI)
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
 
-    // Create D3 projection that uses Mapbox's project() for coordinate conversion
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, width, height);
+
+    // D3 projection using Mapbox's project()
     const project = (lon, lat) => map.project([lon, lat]);
     const projection = {
       stream: (s) => ({
@@ -206,10 +221,13 @@ export default function D3ScoreMapPage() {
         polygonEnd() { s.polygonEnd(); },
       }),
     };
-    const path = d3.geoPath(projection);
 
-    // Get only visible features for performance
+    // D3 path generator with canvas context
+    const path = d3.geoPath(projection).context(ctx);
+
+    // Get visible features and store for hit testing
     const visibleFeatures = getVisibleFeatures(allFeatures, map);
+    visibleFeaturesRef.current = visibleFeatures;
 
     // Use ref to get current metric (avoids stale closure in map event handlers)
     const currentMetric = metricRef.current;
@@ -221,44 +239,38 @@ export default function D3ScoreMapPage() {
 
     const color = d3.scaleSequential(safeDomain, d3.interpolateRdYlGn);
 
-    const layer = svg.select("g[data-layer='cells']").empty()
-      ? svg.append("g").attr("data-layer", "cells")
-      : svg.select("g[data-layer='cells']");
+    // Draw each hex to canvas (this is still D3!)
+    ctx.globalAlpha = 0.7;
+    visibleFeatures.forEach((f) => {
+      ctx.beginPath();
+      path(f);
+      ctx.fillStyle = colorFor(f, currentMetric, color);
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,0.15)";
+      ctx.lineWidth = 0.35;
+      ctx.stroke();
+    });
+  };
 
-    const cells = layer.selectAll("path.hex-cell").data(
-      visibleFeatures,
-      (d) => d.id ?? d.properties?.hex_id ?? Math.random(),
-    );
+  // Map mouse move handler for tooltip hit detection (uses Mapbox events)
+  const handleMapMouseMove = (e) => {
+    const lngLat = e.lngLat;
 
-    cells
-      .join(
-        (enter) =>
-          enter
-            .append("path")
-            .attr("class", "hex-cell")
-            .attr("d", path)
-            .attr("fill", (d) => colorFor(d, currentMetric, color))
-            .attr("fill-opacity", 0.7)
-            .attr("stroke", "rgba(255,255,255,0.15)")
-            .attr("stroke-width", 0.35)
-            .attr("pointer-events", "all")
-            .on("mousemove", (event, d) => showTooltip(event, d, currentMetric))
-            .on("mouseleave", hideTooltip),
-        (update) => {
-          // Only use transitions when changing metrics, not during pan/zoom
-          if (withTransition) {
-            return update
-              .transition()
-              .duration(350)
-              .attr("d", path)
-              .attr("fill", (d) => colorFor(d, currentMetric, color));
-          }
-          return update
-            .attr("d", path)
-            .attr("fill", (d) => colorFor(d, currentMetric, color));
-        },
-        (exit) => exit.remove(),
-      );
+    // Find hex containing this point using D3's geoContains
+    const hoveredFeature = visibleFeaturesRef.current.find((f) => {
+      return d3.geoContains(f, [lngLat.lng, lngLat.lat]);
+    });
+
+    if (hoveredFeature) {
+      // Create a synthetic event-like object for showTooltip
+      const syntheticEvent = {
+        clientX: e.point.x + (wrapperRef.current?.getBoundingClientRect().left ?? 0),
+        clientY: e.point.y + (wrapperRef.current?.getBoundingClientRect().top ?? 0),
+      };
+      showTooltip(syntheticEvent, hoveredFeature, metricRef.current);
+    } else {
+      hideTooltip();
+    }
   };
 
   const legendStops = useMemo(() => {
@@ -291,7 +303,7 @@ export default function D3ScoreMapPage() {
 
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-16 pt-24">
         <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-emerald-200 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
-          Mapbox + D3 GridScore dashboard
+          Mapbox + D3 Canvas GridScore dashboard
         </div>
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
@@ -321,7 +333,7 @@ export default function D3ScoreMapPage() {
           </div>
           <div className="flex flex-wrap gap-2 text-xs text-white/60">
             <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Source: score_map_hex.json</span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Rendering: D3 + Mapbox</span>
+            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Rendering: D3 Canvas</span>
             <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Hover cells for details</span>
           </div>
         </div>
@@ -331,7 +343,10 @@ export default function D3ScoreMapPage() {
           className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#0a1320] via-[#08111d] to-[#0e1624] shadow-[0_30px_80px_rgba(0,0,0,0.35)] h-[70vh] min-h-[520px]"
         >
           <div ref={mapContainerRef} className="absolute inset-0 h-full w-full" />
-          <svg ref={svgRef} className="absolute inset-0 h-full w-full pointer-events-none" />
+          <canvas
+            ref={canvasRef}
+            className="absolute inset-0 h-full w-full pointer-events-none"
+          />
           <div
             ref={tooltipRef}
             className="pointer-events-none absolute left-0 top-0 z-10 hidden min-w-[240px] rounded-2xl border border-white/10 bg-[#0c1622]/95 p-4 text-sm shadow-2xl backdrop-blur-md"
