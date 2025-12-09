@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)",
+      "Bash(cd /Users/neilk/Desktop/School/Yr\\ 3/Q1/DSC\\ 106/Projects/dsc-106-final-proj && npm install:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

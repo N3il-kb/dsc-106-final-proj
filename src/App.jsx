@@ -69,17 +69,32 @@ The profitability component (40%) assesses operational efficiency, and computati
 
 export default function App() {
   const basePath = import.meta.env.BASE_URL ?? "/";
-  const isContactPage =
-    typeof window !== "undefined" &&
-    window.location.pathname.toLowerCase().includes("contact");
-  const isDashboardPage =
-    typeof window !== "undefined" &&
-    window.location.pathname.toLowerCase().includes("dashboard");
 
-  if (isDashboardPage) {
+  const getRoute = () => {
+    if (typeof window === "undefined") return "home";
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (path.includes("dashboard") || hash.includes("dashboard")) return "dashboard";
+    if (path.includes("contact") || hash.includes("contact")) return "contact";
+    return "home";
+  };
+
+  const [route, setRoute] = useState(getRoute);
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(getRoute());
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("popstate", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handleHashChange);
+    };
+  }, []);
+
+  if (route === "dashboard") {
     return <D3ScoreMapPage />;
   }
-  if (isContactPage) {
+  if (route === "contact") {
     return <ContactPage />;
   }
 
@@ -122,10 +137,10 @@ export default function App() {
             </a>
             <span className="text-white/40 italic font-serif text-lg">or</span>
             <a
-              href="#datacenters"
+              href="https://www.youtube.com/"
               className="px-10 py-4 rounded-full border border-white/20 bg-glass text-white font-medium hover:bg-white/10 hover:border-neon/50 transition-all backdrop-blur-sm cursor-pointer"
             >
-              Learn More
+              Watch the Video
             </a>
           </div>
         </div>
@@ -155,9 +170,9 @@ export default function App() {
       <div className="w-full flex flex-col gap-0">
         {sections.map((section, i) =>
           section.id === "gridcast" ? (
-            <FullScreenSection key={section.id} {...section} />
+            <FullScreenSection key={section.id} {...section} basePath={basePath} />
           ) : (
-            <SplitSection key={section.id} {...section} index={i} />
+            <SplitSection key={section.id} {...section} index={i} basePath={basePath} />
           )
         )}
       </div>
@@ -441,6 +456,24 @@ function USDataCenterTypeTierChart() {
 })}
 
 
+        {types.map((type, i) => {
+          const centerX =
+            paddingLeft + i * typeBand + typeBand / 2;
+          const labelY = viewBoxHeight - paddingBottom + 20;
+
+          return (
+            <text
+              key={type.name}
+              x={centerX}
+              y={labelY}
+              textAnchor="middle"
+              fill="#e5e5e5"
+              fontSize={10}
+            >
+              {type.name}
+            </text>
+          );
+        })}
 
         {/* y-axis tick line (just 0 and max for now) */}
         <line
@@ -490,6 +523,8 @@ function SplitSection({
   showInternetChart,
   showUSTypeTierChart,
   showPUEChart, 
+  showPUEChart,
+  basePath,
 }) {
   const isEven = index % 2 === 0;
 
@@ -529,7 +564,7 @@ function SplitSection({
           {showLaunchButton && (
             <div className="mt-10">
               <a
-                href="/dsc-106-final-proj/hex_map.html"
+                href={`${basePath}dashboard`}
                 className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
               >
                 Launch Dashboard
@@ -562,7 +597,7 @@ function SplitSection({
   );
 }
 
-function FullScreenSection({ title, text, background, showLaunchButton }) {
+function FullScreenSection({ title, text, background, showLaunchButton, basePath }) {
   return (
     <section className="relative isolate flex h-screen items-center justify-center overflow-hidden px-6 text-center md:px-24">
       {background ? (
@@ -603,7 +638,7 @@ function FullScreenSection({ title, text, background, showLaunchButton }) {
         {showLaunchButton && (
           <div className="mt-10 flex justify-center">
             <a
-              href="/dsc-106-final-proj/hex_map.html"
+              href={`${basePath}dashboard`}
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
