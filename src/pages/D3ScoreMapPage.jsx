@@ -478,7 +478,7 @@ export default function D3ScoreMapPage() {
         </div> */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            GridCast Score Map
+            GridCast Score Map!
           </h1>
           <p className="max-w-4xl text-lg text-white/70">
             Interactive hex-grid visualization powered by D3 and Mapbox. Hover any cell to inspect profitability,
