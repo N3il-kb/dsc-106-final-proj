@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Redirecting…</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (function () {
+        // GitHub Pages SPA redirect: preserve the requested path as a hash
+        var repo = "/dsc-106-final-proj";
+        var l = window.location;
+        var path = l.pathname.replace(repo, "").replace(/^\/+/, "");
+        var dest = repo + "/#" + path;
+        if (l.search) dest += l.search;
+        if (l.hash) dest += l.hash;
+        window.location.replace(dest || repo + "/");
+      })();
+    </script>
+  </head>
+  <body>
+    Redirecting…
+  </body>
+</html>

@@ -69,17 +69,32 @@ The profitability component (40%) assesses operational efficiency, and computati
 
 export default function App() {
   const basePath = import.meta.env.BASE_URL ?? "/";
-  const isContactPage =
-    typeof window !== "undefined" &&
-    window.location.pathname.toLowerCase().includes("contact");
-  const isDashboardPage =
-    typeof window !== "undefined" &&
-    window.location.pathname.toLowerCase().includes("dashboard");
 
-  if (isDashboardPage) {
+  const getRoute = () => {
+    if (typeof window === "undefined") return "home";
+    const path = window.location.pathname.toLowerCase();
+    const hash = window.location.hash.toLowerCase();
+    if (path.includes("dashboard") || hash.includes("dashboard")) return "dashboard";
+    if (path.includes("contact") || hash.includes("contact")) return "contact";
+    return "home";
+  };
+
+  const [route, setRoute] = useState(getRoute);
+
+  useEffect(() => {
+    const handleHashChange = () => setRoute(getRoute());
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("popstate", handleHashChange);
+    return () => {
+      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener("popstate", handleHashChange);
+    };
+  }, []);
+
+  if (route === "dashboard") {
     return <D3ScoreMapPage />;
   }
-  if (isContactPage) {
+  if (route === "contact") {
     return <ContactPage />;
   }
 
