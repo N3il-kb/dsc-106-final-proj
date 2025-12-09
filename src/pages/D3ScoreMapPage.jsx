@@ -13,7 +13,7 @@ const METRICS = {
   },
   sustainability: {
     label: "Sustainability",
-    description: "ESG tilt driven by renewables share, volatility, and cooling friendliness.",
+    description: "Sustainability is driven by renewable share, grid volatility, and the site’s cooling suitability.",
   },
   profitability: {
     label: "Profitability",
@@ -197,8 +197,21 @@ export default function D3ScoreMapPage() {
         });
 
         const palettes = {};
+        const interpolatorFor = (metric) => {
+          if (metric === "local_temp_c") {
+            // Blue for colder, red for hotter
+            return (t) => d3.interpolateRdBu(1 - t);
+          }
+          if (metric === "elevation_m") {
+            // Green for lower, red for higher
+            return d3.interpolateRgbBasis(["#0e7c3a", "#f3c567", "#c62828"]);
+          }
+          return d3.interpolateRdYlGn;
+        };
+
         Object.entries(domains).forEach(([key, dom]) => {
-          const scale = d3.scaleSequential(dom, d3.interpolateRdYlGn);
+          const interp = interpolatorFor(key);
+          const scale = d3.scaleSequential(dom, interp);
           const colors = Array.from({ length: 256 }, (_, i) => {
             const t = i / 255;
             const v = dom[0] + t * (dom[1] - dom[0]);

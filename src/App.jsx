@@ -367,6 +367,14 @@ function USDataCenterTypeTierChart() {
   const typeBand = plotWidth / types.length;
   const tierBand = typeBand / (tiers.length + 1);
 
+  const typeDescriptions = {
+    Hyperscale: "Large cloud platforms",
+    Colocation: "Rented server space",
+    Enterprise: "Company-owned IT centers",
+    Government: "Government-run secure sites",
+    "Edge/Other": "Small local facilities",
+  };
+
   return (
     <div className="mt-8 w-full max-w-3xl mx-auto rounded-2xl bg-glass border border-white/10 p-4 sm:p-6 backdrop-blur-md">
       <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
@@ -458,6 +466,16 @@ function USDataCenterTypeTierChart() {
           strokeWidth={1}
         />
       </svg>
+
+{/* Type description legend */}
+<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-300">
+  {types.map((t) => (
+    <div key={t.name}>
+      <span className="font-semibold text-white">{t.name}: </span>
+      <span>{typeDescriptions[t.name]}</span>
+    </div>
+  ))}
+</div>
 
       {/* Legend */}
       <div className="mt-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-300">

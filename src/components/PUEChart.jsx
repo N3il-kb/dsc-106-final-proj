@@ -67,6 +67,25 @@ export default function PUEChart() {
 
       svg.append("g").call(d3.axisLeft(y).ticks(5));
 
+      svg
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 8)
+        .attr("fill", "#e5e5e5")
+        .attr("text-anchor", "middle")
+        .attr("font-size", 12)
+        .text("Year");
+
+      svg
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(height / 2))
+        .attr("y", -margin.left + 16)
+        .attr("fill", "#e5e5e5")
+        .attr("text-anchor", "middle")
+        .attr("font-size", 12)
+        .text("PUE");
+
       const line = d3
         .line()
         .x(d => x(d.time))
