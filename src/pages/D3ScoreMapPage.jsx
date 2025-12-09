@@ -42,8 +42,8 @@ export default function D3ScoreMapPage() {
   const mapContainerRef = useRef(null);
   const tooltipRef = useRef(null);
   const featureCollectionRef = useRef(null);
-  const frameIdRef = useRef(null);
   const isPanningRef = useRef(false);
+  const mapReadyRef = useRef(false);
   const prevMetricRef = useRef(defaultMetric);
   const metricRef = useRef(defaultMetric);
   const visibleFeaturesRef = useRef([]);
@@ -51,6 +51,7 @@ export default function D3ScoreMapPage() {
   const palettesRef = useRef({});
   const quadtreeRef = useRef(null);
   const hoveredFeatureRef = useRef(null);
+  const clearHoverRef = useRef(null);
 
   const [metric, setMetric] = useState(defaultMetric);
   const [domain, setDomain] = useState([0, 1]);
@@ -60,11 +61,6 @@ export default function D3ScoreMapPage() {
   const [mapReady, setMapReady] = useState(false);
 
   const metricCopy = useMemo(() => METRICS[metric]?.description ?? "", [metric]);
-  const setCanvasOpacity = (value) => {
-    if (canvasRef.current) {
-      canvasRef.current.style.opacity = value;
-    }
-  };
 
   // Initialize map on mount
   useEffect(() => {
@@ -83,40 +79,44 @@ export default function D3ScoreMapPage() {
     });
 
     map.addControl(new mapboxgl.NavigationControl(), "top-left");
+    clearHoverRef.current = () => {
+      if (hoveredFeatureRef.current) {
+        hoveredFeatureRef.current = null;
+        if (mapReadyRef.current && mapRef.current && featureCollectionRef.current) {
+          render();
+        }
+      }
+      hideTooltip();
+    };
 
     map.on("load", () => {
       mapRef.current = map;
+      mapReadyRef.current = true;
       setMapReady(true);
     });
 
     map.on("movestart", () => {
       isPanningRef.current = true;
       hideTooltip();
-      setCanvasOpacity(0);
     });
+
+    // Keep overlay in sync with map rendering
+    map.on("render", () => render());
 
     // Render once after panning/zooming stops
     map.on("moveend", () => {
       isPanningRef.current = false;
-      setCanvasOpacity(1);
       render();
     });
 
     map.on("resize", () => render());
 
     // Handle mouse move for tooltip hit detection (on map, not canvas)
-    map.on("mousemove", (e) => {
-      handleMapMouseMove(e);
-    });
-
-    map.on("mouseleave", () => {
-      hideTooltip();
-    });
+    map.on("mousemove", (e) => handleMapMouseMove(e));
+    map.on("mouseleave", () => clearHoverRef.current?.());
 
     return () => {
-      if (frameIdRef.current) {
-        cancelAnimationFrame(frameIdRef.current);
-      }
+      mapReadyRef.current = false;
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -243,6 +243,7 @@ export default function D3ScoreMapPage() {
     canvas.style.height = `${height}px`;
 
     const ctx = canvas.getContext("2d");
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // reset any previous scaling
     ctx.scale(dpr, dpr);
     ctx.clearRect(0, 0, width, height);
 
@@ -384,6 +385,22 @@ export default function D3ScoreMapPage() {
     });
   }, [domain, metric]);
 
+  // Ensure hover clears when leaving the wrapper (covers embedded contexts)
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    if (!wrapper) return undefined;
+    const onLeave = () => clearHoverRef.current?.();
+    wrapper.addEventListener("mouseleave", onLeave);
+    const container = mapContainerRef.current;
+    if (container) {
+      container.addEventListener("mouseleave", onLeave);
+    }
+    return () => {
+      wrapper.removeEventListener("mouseleave", onLeave);
+      if (container) container.removeEventListener("mouseleave", onLeave);
+    };
+  }, []);
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-[#050910] text-white">
       <div className="absolute inset-0 -z-10 opacity-70">
@@ -404,9 +421,9 @@ export default function D3ScoreMapPage() {
       <Navbar />
 
       <main className="mx-auto flex max-w-6xl flex-col gap-6 px-4 pb-16 pt-24">
-        <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-emerald-200 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
-          Mapbox + D3 Canvas GridScore dashboard
-        </div>
+        {/* <div className="inline-flex w-fit items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-4 py-2 text-emerald-200 shadow-[0_0_25px_rgba(16,185,129,0.35)]">
+          Mapbox + D3 GridScore dashboard
+        </div> */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
             GridCast Score Map
@@ -432,11 +449,6 @@ export default function D3ScoreMapPage() {
               ))}
             </select>
             <span className="text-sm text-white/70">{metricCopy}</span>
-          </div>
-          <div className="flex flex-wrap gap-2 text-xs text-white/60">
-            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Source: score_map_hex.json</span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Rendering: D3 Canvas</span>
-            <span className="rounded-lg border border-white/10 bg-white/5 px-3 py-1">Hover cells for details</span>
           </div>
         </div>
 
@@ -520,6 +532,7 @@ export default function D3ScoreMapPage() {
     if (!tooltipRef.current) return;
     const tooltip = d3.select(tooltipRef.current);
     tooltip.classed("hidden", true);
+    tooltip.style("display", "none");
   }
 }
 
