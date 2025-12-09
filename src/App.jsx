@@ -137,7 +137,7 @@ export default function App() {
             </a>
             <span className="text-white/40 italic font-serif text-lg">or</span>
             <a
-              href="https://www.youtube.com/watch?v=vOQEVUWjUXY"
+              href="https://www.youtube.com/watch?v=g5yJWlW-UJU"
               className="px-10 py-4 rounded-full border border-white/20 bg-glass text-white font-medium hover:bg-white/10 hover:border-neon/50 transition-all backdrop-blur-sm cursor-pointer"
             >
               Watch the Video
