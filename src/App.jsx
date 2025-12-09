@@ -6,6 +6,9 @@ import Dither from "@/components/Dither";
 import Navbar from "@/components/Navbar";
 import D3ScoreMapPage from "@/pages/D3ScoreMapPage";
 import InternetUsageChart from "@/components/InternetUsageChart";
+import PUEChart from "@/components/PUEChart";
+
+
 
 
 import usDataCsvUrl from "../archive/Book1.csv?url";
@@ -35,12 +38,14 @@ To understand their reliability, we look at how each type is distributed across 
     But behind every query and every AI model training session lies massive computational infrastructure. Data centers currently consume 1-2% of global electricity, and with AI's explosive growth, that number is skyrocketing.The energy used to power these data centers must be monitored and optimized to fit our needs as businesses and as people. As AI becomes more integrated into our daily lives, we're facing a critical question: how do we fuel this technological revolution without accelerating the climate crisis?
 `,
     background: "/dsc-106-final-proj/images/coal-bg.jpg",
+    
   },
   {
     id: "energy",
     title: "The Solution: Sustainable Data Centers",
     text: `Sustainable data centers are facilities designed to minimize environmental impact while maintaining high computing performance. These facilities achieve efficiency through renewable energy sources, optimized cooling systems with low PUE ratings, and water conservation techniques. The best sustainable data centers can operate on 100% renewable energy with PUE scores below 1.15, compared to the industry average of 1.58.`,
     background: "/dsc-106-final-proj/images/sustainable_datacenter.jpg",
+    showPUEChart: true, 
   },
   {
     id: "score",
@@ -150,9 +155,9 @@ export default function App() {
       <div className="w-full flex flex-col gap-0">
         {sections.map((section, i) =>
           section.id === "gridcast" ? (
-            <FullScreenSection key={section.id} {...section} basePath={basePath} />
+            <FullScreenSection key={section.id} {...section} />
           ) : (
-            <SplitSection key={section.id} {...section} index={i} basePath={basePath} />
+            <SplitSection key={section.id} {...section} index={i} />
           )
         )}
       </div>
@@ -254,7 +259,6 @@ function USDataCenterTypeTierChart() {
       try {
         const res = await fetch(usDataCsvUrl);
         const text = await res.text();
-
         const rows = d3.csvParse(text);
 
         const usaRow = rows.find((row) => row.country === "United States");
@@ -328,74 +332,134 @@ function USDataCenterTypeTierChart() {
   const { types, tiers, tierPercents, maxCount } = chartData;
 
   const tierColors = {
-    I: "bg-sky-400",
-    II: "bg-emerald-400",
-    III: "bg-yellow-400",
-    IV: "bg-red-400",
+    I: "#38bdf8",      // sky-400
+    II: "#34d399",     // emerald-400
+    III: "#facc15",    // yellow-400
+    IV: "#f87171",     // red-400
   };
 
+  // SVG layout
+  const viewBoxWidth = 420;
+  const viewBoxHeight = 260;
+  const paddingLeft = 50;
+  const paddingRight = 20;
+  const paddingTop = 20;
+  const paddingBottom = 40;
+
+  const plotWidth = viewBoxWidth - paddingLeft - paddingRight;
+  const plotHeight = viewBoxHeight - paddingTop - paddingBottom;
+
+  const typeBand = plotWidth / types.length;
+  const tierBand = typeBand / (tiers.length + 1);
+
   return (
-    <div className="mt-8 rounded-2xl bg-glass border border-white/10 p-4 sm:p-6 backdrop-blur-md">
-      <h3 className="text-xl font-semibold text-white mb-2">
+    <div className="mt-8 w-full max-w-3xl mx-auto rounded-2xl bg-glass border border-white/10 p-4 sm:p-6 backdrop-blur-md">
+      <h3 className="text-xl sm:text-2xl font-semibold text-white mb-2">
         U.S. Data Center Types by Tier
       </h3>
-      <p className="text-sm text-gray-400 mb-4">
+      <p className="text-sm sm:text-base text-gray-400 mb-4">
         For each major U.S. data center type, the grouped bars show the
-        estimated number of facilities in Tier I–IV. Higher tiers correspond
-        to more redundancy and higher expected uptime.
+        estimated number of facilities in Tier I–IV. Higher tiers correspond to
+        more redundancy and higher expected uptime.
       </p>
 
-      <div className="flex flex-col gap-4">
-        {/* Chart */}
-        <div className="flex h-64 w-full items-end gap-4 sm:gap-6">
-          {types.map((type) => (
-            <div
+      {/* SVG chart */}
+      <svg
+        viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+        className="w-full h-auto"
+      >
+        {/* x-axis line */}
+        <line
+          x1={paddingLeft}
+          y1={viewBoxHeight - paddingBottom}
+          x2={viewBoxWidth - paddingRight}
+          y2={viewBoxHeight - paddingBottom}
+          stroke="#e5e5e5"
+          strokeWidth={1}
+        />
+
+        {/* Bars */}
+        {types.map((type, i) => {
+          const baseX = paddingLeft + i * typeBand;
+
+          return tiers.map((tier, j) => {
+            const value =
+              (type.count * (tierPercents[tier] ?? 0)) / 100;
+            const barHeight =
+              maxCount > 0 ? (value / maxCount) * plotHeight : 0;
+
+            const x =
+              baseX + j * tierBand + tierBand * 0.1;
+            const y =
+              viewBoxHeight - paddingBottom - barHeight;
+            const barWidth = tierBand * 0.8;
+
+            return (
+              <rect
+                key={`${type.name}-${tier}`}
+                x={x}
+                y={y}
+                width={barWidth}
+                height={barHeight}
+                fill={tierColors[tier]}
+              >
+                <title>
+                  {`${type.name} – Tier ${tier}: ${value.toFixed(
+                    0
+                  )} data centers (approx.)`}
+                </title>
+              </rect>
+            );
+          });
+        })}
+
+        {/* Type labels */}
+        {types.map((type, i) => {
+          const centerX =
+            paddingLeft + i * typeBand + typeBand / 2;
+          const labelY = viewBoxHeight - paddingBottom + 20;
+
+          return (
+            <text
               key={type.name}
-              className="flex flex-1 flex-col items-center justify-end"
+              x={centerX}
+              y={labelY}
+              textAnchor="middle"
+              fill="#e5e5e5"
+              fontSize={10}
             >
-              <div className="flex h-48 w-full items-end justify-center gap-1 sm:gap-1.5">
-                {tiers.map((tier) => {
-                  const value =
-                    (type.count * (tierPercents[tier] ?? 0)) / 100;
-                  const height = maxCount > 0 ? (value / maxCount) * 100 : 0;
+              {type.name}
+            </text>
+          );
+        })}
 
-                  return (
-                    <div
-                      key={tier}
-                      className={`rounded-t-md ${tierColors[tier]}`}
-                      style={{
-                        height: `${height}%`,
-                        width: "0.5rem",
-                      }}
-                      title={`${type.name} – Tier ${tier}: ${value.toFixed(
-                        0
-                      )} data centers (approx.)`}
-                    />
-                  );
-                })}
-              </div>
-              <span className="mt-2 text-xs sm:text-sm text-white/80 text-center">
-                {type.name}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* y-axis tick line (just 0 and max for now) */}
+        <line
+          x1={paddingLeft}
+          y1={paddingTop}
+          x2={paddingLeft}
+          y2={viewBoxHeight - paddingBottom}
+          stroke="#e5e5e5"
+          strokeWidth={1}
+        />
+      </svg>
 
-        {/* Legend */}
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-300">
-          {tiers.map((tier) => (
-            <div key={tier} className="flex items-center gap-2">
-              <span
-                className={`inline-block h-3 w-3 rounded-sm ${tierColors[tier]}`}
-              />
-              <span>Tier {tier}</span>
-            </div>
-          ))}
-        </div>
+      {/* Legend */}
+      <div className="mt-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-300">
+        {tiers.map((tier) => (
+          <div key={tier} className="flex items-center gap-2">
+            <span
+              className="inline-block h-3 w-3 rounded-sm"
+              style={{ backgroundColor: tierColors[tier] }}
+            />
+            <span>Tier {tier}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
+
 
 function SplitSection({
   id,
@@ -406,7 +470,7 @@ function SplitSection({
   index,
   showInternetChart,
   showUSTypeTierChart,
-  basePath,
+  showPUEChart, 
 }) {
   const isEven = index % 2 === 0;
 
@@ -441,10 +505,12 @@ function SplitSection({
 
           {showUSTypeTierChart && <USDataCenterTypeTierChart />}
 
+          {showPUEChart && <PUEChart />}
+
           {showLaunchButton && (
             <div className="mt-10">
               <a
-                href={`${basePath}dashboard`}
+                href="/dsc-106-final-proj/hex_map.html"
                 className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
               >
                 Launch Dashboard
@@ -477,7 +543,7 @@ function SplitSection({
   );
 }
 
-function FullScreenSection({ title, text, background, showLaunchButton, basePath }) {
+function FullScreenSection({ title, text, background, showLaunchButton }) {
   return (
     <section className="relative isolate flex h-screen items-center justify-center overflow-hidden px-6 text-center md:px-24">
       {background ? (
@@ -518,7 +584,7 @@ function FullScreenSection({ title, text, background, showLaunchButton, basePath
         {showLaunchButton && (
           <div className="mt-10 flex justify-center">
             <a
-              href={`${basePath}dashboard`}
+              href="/dsc-106-final-proj/hex_map.html"
               className="px-10 py-4 rounded-full bg-white text-black font-bold text-lg hover:bg-white hover:scale-105 transition-all shadow-[0_0_20px_rgba(0,255,128,0.4)]"
             >
               Launch Dashboard
