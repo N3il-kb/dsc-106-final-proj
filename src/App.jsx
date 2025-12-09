@@ -249,6 +249,14 @@ function parseNumericCell(cell) {
   return cleaned ? Number(cleaned) : 0;
 }
 
+const typeDescriptions = {
+  Hyperscale: "Large cloud platforms",
+  Colocation: "Rented server space",
+  Enterprise: "Company-owned IT centers",
+  Government: "Government-run secure sites",
+  "Edge/Other": "Small local facilities",
+};
+
 /* NEW: read USA from CSV and show top 5 datacenter types vs tiers */
 function USDataCenterTypeTierChart() {
   const [chartData, setChartData] = useState(null);
@@ -414,24 +422,25 @@ function USDataCenterTypeTierChart() {
         })}
 
         {/* Type labels */}
-        {types.map((type, i) => {
-          const centerX =
-            paddingLeft + i * typeBand + typeBand / 2;
-          const labelY = viewBoxHeight - paddingBottom + 20;
+{types.map((type, i) => {
+  const centerX = paddingLeft + i * typeBand + typeBand / 2;
+  const labelY = viewBoxHeight - paddingBottom + 20;
 
-          return (
-            <text
-              key={type.name}
-              x={centerX}
-              y={labelY}
-              textAnchor="middle"
-              fill="#e5e5e5"
-              fontSize={10}
-            >
-              {type.name}
-            </text>
-          );
-        })}
+  return (
+    <text
+      key={type.name}
+      x={centerX}
+      y={labelY}
+      textAnchor="middle"
+      fill="#e5e5e5"
+      fontSize={10}
+    >
+      {type.name}
+    </text>
+  );
+})}
+
+
 
         {/* y-axis tick line (just 0 and max for now) */}
         <line
@@ -443,6 +452,16 @@ function USDataCenterTypeTierChart() {
           strokeWidth={1}
         />
       </svg>
+
+      {/* Type description legend */}
+<div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-300">
+  {types.map((t) => (
+    <div key={t.name}>
+      <span className="font-semibold text-white">{t.name}: </span>
+      <span>{typeDescriptions[t.name]}</span>
+    </div>
+  ))}
+</div>
 
       {/* Legend */}
       <div className="mt-3 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-gray-300">
