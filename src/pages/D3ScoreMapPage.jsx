@@ -9,11 +9,11 @@ const BASE_PATH = import.meta.env.BASE_URL ?? "/";
 const METRICS = {
   dc_score: {
     label: "GridScore",
-    description: "Composite score balancing sustainability and profitability (60/40 weighting).",
+    description: "Composite score balancing sustainability and profitability (60/40 weight).",
   },
   sustainability: {
     label: "Sustainability",
-    description: "ESG tilt driven by renewables share, volatility, and cooling friendliness.",
+    description: "Score driven by renewable energy use, grid stability, and cooling efficiency..",
   },
   profitability: {
     label: "Profitability",
