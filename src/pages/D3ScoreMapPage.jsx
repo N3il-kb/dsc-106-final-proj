@@ -232,6 +232,12 @@ export default function D3ScoreMapPage() {
     const map = mapRef.current;
     if (!map || !mapContainerRef.current) return;
 
+    // Mirror Mapbox canvas transform to avoid drift during pan/zoom
+    const mapCanvas = map.getCanvas();
+    if (mapCanvas && canvas.style.transform !== mapCanvas.style.transform) {
+      canvas.style.transform = mapCanvas.style.transform;
+    }
+
     const width = mapContainerRef.current.clientWidth || 960;
     const height = mapContainerRef.current.clientHeight || 520;
 
@@ -461,6 +467,16 @@ export default function D3ScoreMapPage() {
             ref={canvasRef}
             className="absolute inset-0 h-full w-full pointer-events-none"
           />
+          <div className="pointer-events-none absolute right-4 top-4 z-10 flex flex-col gap-2 text-xs text-right">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-white/80 shadow-lg backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-emerald-300" />
+              Cool, high-GridScore cluster (PNW)
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-black/60 px-3 py-1 text-white/80 shadow-lg backdrop-blur">
+              <span className="h-2 w-2 rounded-full bg-amber-300" />
+              Warmer, costlier cells across the South
+            </span>
+          </div>
           <div
             ref={tooltipRef}
             className="pointer-events-none absolute left-0 top-0 z-10 hidden min-w-[240px] rounded-2xl border border-white/10 bg-[#0c1622]/95 p-4 text-sm shadow-2xl backdrop-blur-md"
